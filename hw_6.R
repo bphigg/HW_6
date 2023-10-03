@@ -1,3 +1,5 @@
+library(dplyr)
+
 t_stat <- function(data, mu){
   denom <- sd(data, na.rm = TRUE)/sqrt(length(data))
   numer <- (mean(data) - mu)

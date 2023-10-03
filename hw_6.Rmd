@@ -76,3 +76,41 @@ hyp_test_wrap(iris$Petal.Length, 4, .05, "left")
 
 ## Monte Carlo
 
+In this section, we want to compare the mean of a random gamma distribution to the actual mean (mu) of the distribution using a t-test. By using the significance levels of a t-distribution on the average of a gamma distribution, we will be able to calculate the Type 1 Error rate (alpha) and compare it to the expected error rate (significance level). In order to do this, we will need to be able to collect the results of a number, n,  of t-tests, each with a different gamma distribution. 
+
+First we will create a function that will take in the parameters of a gamma distribution (size, shape, scale) as well as the parameters for the t-test (significance level, and direction of test). This function will then create a gamma distribution that will then run through the t-test returning a `TRUE` or `FALSE` result. This will tell us if the mean of the random gamma distribution is within the expected parameter (Null Hypothesis not rejected = `FALSE`) or the mean lies outside the expected parameter (Null Hypothesis is rejected = `TRUE`).
+```{r gamma_test}
+gamma_test <- function(size, shape, rate, alpha, direction){
+  g_dist <- rgamma(size, shape, rate)
+  mean <- shape*(1/rate)
+  return(hyp_test_wrap(g_dist, mean, alpha, direction))
+}
+```
+<br>
+In this example, we'll create a gamma distribution of size 100, shape 2, rate 5, significance level .05, and "right-side" direction. The result of this test will tell us if the mean of the distribution is greater than mu, the expected mean. (mu here would be (shape * 1/scale) = 0.4)
+```{r gamma_tes_1}
+# using a seed to ensure the same result on each knit
+set.seed(4)
+gamma_test(100, 2, 5, .05, "right")
+```
+For this iteration of the gamma test, the mean of the distribution is less than the 95 percentile of the distribution of the expected mean, mu. Therefore we got the result `FALSE`, the Null Hypothesis is not rejected.
+<br>
+We can now run the `gamma_test()` function through the `replicate` function n times to get the results of n different gamma distributions. 
+```{r gamma_replicates}
+set.seed(NULL)
+replicate(10, gamma_test(10, .2, 1, .05, "two-sided"), simplify="array")
+```
+<br>
+Wrap this in a `mean()` function and we get the average number of times the mean of a gamma distribution exceeds the significance level. Let's run the gamma test on 10,000 gamma distributions and get the average Null Hypothesis rejections.
+```{r gamma_mean}
+set.seed(4)
+mean(replicate(10000, gamma_test(10, .2, 1, .05, "two-sided"), simplify="array"))
+```
+Here we can see the average rate at which the mean of the gamma distribution was statistically significant (the Type I Error Rate, since we know mu is the correct mean) is 23.23%. This is over four times higher than expected with a significance level of .05.
+(**Rember** we're expecting a high error rate because we are comparing the results of a gamma distribution to the significance level of a t-distribution).
+<br>
+## Parallel Computing
+<br>
+In the previous Monte Carlo scenario, we were able to reproduce and record the results of the `gamma_test()` 10,000 times. But to do so, we had to use the same parameters for the gamma distribution. Now lets see if we can do the same test with different parameters and compare the results.
+
+When we set the scale to 1, the actual mean will simply equal the shape of the distribution. 

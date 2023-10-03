@@ -5,10 +5,13 @@ gamma_test <- function(size, shape, rate, alpha, direction){
 }
 gamma_test(100, 2, 5, .05, "right")
 
-sum(replicate(10000, gamma_test(10, .2, 1, .05, "left"), simplify="array"))/10000
+sum(replicate(10000, gamma_test(10, .2, 1, .05, "two-sided"), simplify="array"))/10000
+
+mean(replicate(10, gamma_test(10, .2, 1, .05, "two-sided"), simplify="array"))
+
+#######################
 
 sum(sapply(1:100, FUN = gamma_test, size=10, shape=.2))/99
-
 
 size <- c(10, 20, 30, 40, 50)
 shape <- c(.2, .5, 1, 2, 5, 10, 20)
