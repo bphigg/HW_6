@@ -1,7 +1,3 @@
-g_dist <- rgamma(100, .3, 4)
-mean(g_dist)
-hyp_test_wrap(g_dist, .075, .01, "right")
-
 gamma_test <- function(size, shape, rate, alpha, direction){
   g_dist <- rgamma(size, shape, rate)
   mean <- shape*(1/rate)
@@ -9,12 +5,13 @@ gamma_test <- function(size, shape, rate, alpha, direction){
 }
 gamma_test(100, 2, 5, .05, "right")
 
-gamma_test(10, .2, 1, .05, "two-sided")
+sum(replicate(10000, gamma_test(10, .2, 1, .05, "left"), simplify="array"))/10000
 
-gamm_test <- function(size, shape, rate, alpha, direction){
-  df <- size -1
-  mean <- shape*(1/rate)
-  return(hyp_test_wrap(x, mean, alpha, direction))
-}
+sum(sapply(1:100, FUN = gamma_test, size=10, shape=.2))/99
 
-sapply(X=mean(rgamma(10, .2, 1)), FUN = hyp_test_wrap(x, .2, .05, "two-sided"), na.rm=TRUE)
+
+size <- c(10, 20, 30, 40, 50)
+shape <- c(.2, .5, 1, 2, 5, 10, 20)
+par_list <- as.list(expand.grid(size=size, shape=shape))
+
+lapply(1:35, FUN=gamma_test, size=par_list$size[x], shape=par_list$shape[x])
