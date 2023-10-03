@@ -3,16 +3,16 @@ t_stat <- function(data, mu){
   numer <- (mean(data) - mu)
   return(numer/denom)
 }
-
-hyp_test_1 <- function(t_stat, n, sig_level, direction){
-  df <- n-1
-  significance <- ifelse(direction == "left", qt(sig_level, df),
-                    ifelse(direction == "right", qt(1-sig_level, df),
-                           ifelse(direction == "two-sided", qt(c(sig_level/2, 1-(sig_level/2)), df),
-                                   stop("enter direction ('left', right', two-sided')"))))
-  return(all(t_stat >= significance))
-}
-
+################################################################################
+#hyp_test_1 <- function(t_stat, n, sig_level, direction){
+#  df <- n-1
+#  significance <- ifelse(direction == "left", qt(sig_level, df),
+#                    ifelse(direction == "right", qt(1-sig_level, df),
+#                           ifelse(direction == "two-sided", qt(c(sig_level/2, 1-(sig_level/2)), df),
+#                                   stop("enter direction ('left', right', two-sided')"))))
+#  return(all(t_stat >= significance))
+#}
+################################################################################
 hyp_test <- function(t_stat, n, sig_level, direction){
   df <- n-1
   significance <- ifelse(direction == "left", return(t_stat <= qt(sig_level, df)),
