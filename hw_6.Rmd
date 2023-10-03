@@ -1,0 +1,78 @@
+---
+title: "hw_6"
+output: html_document
+date: "2023-10-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warnings = FALSE, error = FALSE)
+```
+
+## Overview
+
+In this assignment we are going to conduct a t-test on a gamma distribution of a variety of shapes and determine the alpha rate (Type 1 errors) for each shape.  
+
+## t-test
+
+To get started, we will first need to write functions to conduct a t-test This will include a function to calculate the t-statistic and a function to compare that statistic to a t-distribution with a given significance level. Overall, we want to know if the mean of the gamma distribution falls within the distribution of the true mean (mu) for a given significance level.  
+
+Calculate t-statistic
+```{r t_stat}
+t_stat <- function(data, mu){
+  denom <- sd(data, na.rm = TRUE)/sqrt(length(data))
+  numer <- (mean(data) - mu)
+  return(numer/denom)
+}
+```
+<br>
+Once the t-statistic has been calculated, it will need to be compared to the t-distribution with specified significance levels. Determining whether the t-statistic falls within a t-distribution of mu also requires specifying the direction of the alternative hypothesis. To do this, we'll employ `ifelse()` function.
+```{r t_test}
+hyp_test <- function(t_stat, n, sig_level, direction){
+  df <- n-1
+  return(ifelse(direction == "left", return(t_stat <= qt(sig_level, df)),
+                         ifelse(direction == "right", return(t_stat >= qt(1-sig_level, df)),
+                                ifelse(direction == "two-sided", return(t_stat <= qt(sig_level/2, df) | t_stat >= qt(1-sig_level/2, df)),
+                                       stop("enter direction ('left', right', two-sided')")))))
+}
+```
+We've set up the logical operators to return `FALSE` if the t-statistic falls within the distribution of mu for the given significance level (null hypothesis NOT rejected) and to return `TRUE` if the t-statistic falls outside of the distribution of mu for the given significance level (null hypothesis IS rejected).
+<br>
+
+Lastly, a wrapper function is used to quickly run the hypothesis test with the given inputs of `data`, `mu`, `significance level` and `direction`.
+```{r hyp_test_wrapper}
+hyp_test_wrap <- function(data, mu, sig_level, direction){
+  n <- length(data)
+  df <- n-1
+  t_stat <- t_stat(data, mu)
+  test <- hyp_test(t_stat, n, sig_level, direction)
+  return(test)
+}
+```
+<br>
+
+We can test this function on the `Iris` dataframe and check it's accuracy.
+*Does the true mean of* `Sepal.Length` *differ from 5.5?*
+```{r iris_testa}
+# (mean(iris$Sepal.Length)-5.5)/(sd(iris$Sepal.Length)/sqrt(150)) = 5.078 
+# qt(c(.05/2, 1-(.05/2)), 149) = -1.976, 1.976
+# 5.078 <= -1.976 | 5.078 >= 1.976 -> TRUE
+hyp_test_wrap(iris$Sepal.Length, 5.5, .05, "two-sided")
+```
+*Is the true mean of* `Sepal.Width` *greater than 3.5?*
+```{r iris_testb}
+# (mean(iris$Sepal.Width)-3.5)/(sd(iris$Sepal.Width)/sqrt(150)) = -12.439
+# qt(1-.05, 149) = 1.655
+# -12.439 >= 1.655 -> FALSE
+hyp_test_wrap(iris$Sepal.Width, 3.5, .05, "right")
+```
+*Is the true mean of* `Petal.Length` *less than 4?*
+```{r iris_testc}
+# (mean(iris$Petal.Length)-4)/(sd(iris$Petal.Length)/sqrt(150)) = -1.679
+# qt(.05, 149) = -1.655
+# -1.679 <= -1.655 -> TRUE
+hyp_test_wrap(iris$Petal.Length, 4, .05, "left")
+```
+<br>
+
+## Monte Carlo
+

@@ -15,10 +15,10 @@ t_stat <- function(data, mu){
 ################################################################################
 hyp_test <- function(t_stat, n, sig_level, direction){
   df <- n-1
-  significance <- ifelse(direction == "left", return(t_stat <= qt(sig_level, df)),
+  return(ifelse(direction == "left", return(t_stat <= qt(sig_level, df)),
                          ifelse(direction == "right", return(t_stat >= qt(1-sig_level, df)),
                                 ifelse(direction == "two-sided", return(t_stat <= qt(sig_level/2, df) | t_stat >= qt(1-sig_level/2, df)),
-                                       stop("enter direction ('left', right', two-sided')"))))
+                                       stop("enter direction ('left', right', two-sided')")))))
 }
 
 hyp_test_wrap <- function(data, mu, sig_level, direction){
